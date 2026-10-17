@@ -1,0 +1,47 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.mobileprovision
+*.p12
+*.jks
+*.keystore
+*.pem
+*.cer
+*.key
+
+# Apple
+.DS_Store
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.ipa
+*.dSYM
+*.dSYM.zip
+.swiftpm/
+.build/
+
+# Android / Gradle
+.gradle/
+local.properties
+captures/
+*.apk
+*.aab
+**/build/
+
+# Cross-platform tooling
+node_modules/
+.expo/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+coverage/
+dist/
+
+# Editors and local output
+__pycache__/
+*.py[cod]
+.idea/
+.vscode/
+*.log
+tmp/
