@@ -1,4 +1,4 @@
-"""Logging helpers for {{Component Name}}."""
+"""Component logging helpers."""
 
 import logging
 

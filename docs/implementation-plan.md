@@ -2,6 +2,13 @@
 
 ## Current State
 
+General consistency audit returned one major finding: quoted display names could
+produce invalid Python and TOML. The local repair uses language-specific string
+literals and keeps display names out of generated Python docstring delimiters.
+Regression cases parse all generated Python and TOML and execute the generated CLI
+for quotes, triple quotes, backslashes, controls and Unicode. All five local tests
+and diff hygiene pass. Repair remains local until reviewed and committed.
+
 Initial delivery complete: shared work-tracking base, component/mobile profile
 composition, portable version provenance and generated-output verification. The
 public repository is https://github.com/calebini/cortext-repo-templates.

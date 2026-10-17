@@ -1,8 +1,8 @@
-"""Command-line entrypoint for {{Component Name}}."""
+"""Component command-line entrypoint."""
 
 
 def main() -> None:
-    print("{{Component Name}}")
+    print({{display_name_python}})
 
 
 if __name__ == "__main__":

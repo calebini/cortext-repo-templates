@@ -57,6 +57,8 @@ def scaffold(profile: str, slug: str, destination: Path, *, platform: str | None
         '{{Component Name}}': display_name or slug,
         '{{app_slug}}': slug, '{{App Name}}': display_name or slug,
         '{{platform_profile}}': platform or '',
+        '{{display_name_python}}': repr(display_name or slug),
+        '{{display_name_toml}}': json.dumps(display_name or slug, ensure_ascii=False).replace('\x7f', '\\u007f'),
     }
 
     def render(text: str) -> str:

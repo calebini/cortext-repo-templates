@@ -1,4 +1,4 @@
-"""Configuration for {{Component Name}}."""
+"""Component configuration."""
 
 from dataclasses import dataclass
 

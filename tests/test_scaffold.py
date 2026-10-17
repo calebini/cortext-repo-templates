@@ -1,9 +1,11 @@
 import importlib.util
 import json
+import ast
 from pathlib import Path
 import tempfile
 import subprocess
 import sys
+import tomllib
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,6 +15,23 @@ SPEC.loader.exec_module(MODULE)
 
 
 class ScaffoldTests(unittest.TestCase):
+    def test_display_names_preserve_values_in_python_and_toml(self):
+        names = ['My "Quoted" Service', "Owner's Service", 'Triple """ quote',
+                 'Path \\ service', 'Line\nBreak\tService', 'Café 🚀', 'Delete\x7fCharacter']
+        for name in names:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as tmp:
+                target = Path(tmp) / 'sample'
+                MODULE.scaffold('component', 'sample', target, display_name=name)
+                metadata = tomllib.loads((target / 'pyproject.toml').read_text())
+                self.assertEqual(metadata['project']['description'], name)
+                for source in (target / 'src').rglob('*.py'):
+                    ast.parse(source.read_text(), filename=str(source))
+                cli = target / 'src/sample/cli.py'
+                result = subprocess.run([sys.executable, '-X', 'utf8', str(cli)],
+                                        capture_output=True, encoding='utf-8')
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout, name + '\n')
+
     def test_all_profiles_share_tracking_and_keep_platform_boundaries(self):
         for profile, platform in [('component', None), *[('mobile', p) for p in MODULE.PLATFORMS]]:
             with self.subTest(profile=profile, platform=platform), tempfile.TemporaryDirectory() as tmp:

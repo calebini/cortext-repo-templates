@@ -1,1 +1,1 @@
-"""{{Component Name}}."""
+"""Component package."""

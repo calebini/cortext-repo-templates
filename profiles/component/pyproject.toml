@@ -1,7 +1,7 @@
 [project]
 name = "{{component_slug}}"
 version = "0.1.0"
-description = "{{Component Name}}"
+description = {{display_name_toml}}
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
