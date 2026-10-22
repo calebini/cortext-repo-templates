@@ -18,9 +18,11 @@ PLATFORMS = {
 }
 SKIP = {'.git', '__pycache__', '.pytest_cache', '.DS_Store'}
 LINKS = '''
-## Work Tracking
+## Project Workflow
 
-- [Backlog](docs/backlog.md): future ideas and pipeline work.
+- [Agent instructions](AGENTS.md): repository ground rules and required checks.
+- [High-level design](specs/HLD.md): design entry point and supporting specifications.
+- [Roadmap](docs/roadmap.md): future ideas, intended outcomes and tentative priorities.
 - [Implementation plan](docs/implementation-plan.md): durable delivery and next steps.
 - [Decision records](specs/decisions/): choices, rationale and consequences.
 - [Shared convention](docs/work-tracking.md): responsibilities and transient handoffs.

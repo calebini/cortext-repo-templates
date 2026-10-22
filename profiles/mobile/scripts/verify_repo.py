@@ -7,6 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = (
     "AGENTS.md", "README.md", "profile/README.md", "specs/repo-standard.md",
+    "specs/HLD.md", "docs/roadmap.md", "docs/implementation-plan.md",
+    "docs/work-tracking.md",
     "specs/overview.md", "specs/architecture.md", "specs/interfaces.md",
     "specs/lifecycle.md", "specs/security-privacy.md", "specs/testing.md",
     "specs/release.md", "specs/accessibility-localization.md",

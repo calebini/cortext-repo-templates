@@ -16,7 +16,16 @@ Cortext components should be independently understandable, testable, and releasa
 - `tests/` is executable expectations.
 - `notes/` is optional scratch thinking and should not define durable behavior.
 
-## Required Spec Files
+## Design entry point
+
+`specs/HLD.md` is required and owns the high-level design: scope, system context,
+architecture, major flows, constraints and links to detailed promises. Small
+components may keep their design in the HLD; expand the supporting starter specs
+below as needed. Keep each promise in one place and maintain HLD links when moving it.
+Cross-repository compatibility changes still require the compatibility documentation,
+contracts and contract tests described below.
+
+## Supporting specifications
 
 - `specs/overview.md`: what this component owns, who uses it, and explicit non-goals.
 - `specs/architecture.md`: internal boundaries, dependency direction, lifecycle, and major components.
@@ -26,7 +35,10 @@ Cortext components should be independently understandable, testable, and releasa
 - `specs/config.md`: configuration surface, defaults, environment variables, and precedence.
 - `specs/compatibility.md`: cross-repo compatibility expectations, versioning, and migration rules.
 
-## Required Implementation Shape
+## Implementation shape
+
+Create only the boundaries the component currently needs. The starter layout below
+is a guide; do not retain empty architecture solely to match it.
 
 ```txt
 src/<package>/

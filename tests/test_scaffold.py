@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import re
 import ast
 from pathlib import Path
 import tempfile
@@ -37,12 +38,22 @@ class ScaffoldTests(unittest.TestCase):
             with self.subTest(profile=profile, platform=platform), tempfile.TemporaryDirectory() as tmp:
                 target = Path(tmp) / 'sample'
                 MODULE.scaffold(profile, 'sample-app', target, platform=platform, display_name='Sample App')
-                for name in ('backlog.md', 'implementation-plan.md', 'work-tracking.md'):
+                for name in ('roadmap.md', 'implementation-plan.md', 'work-tracking.md'):
                     self.assertEqual((target / 'docs' / name).read_bytes(), (ROOT / 'base/docs' / name).read_bytes())
                 agents = (target / 'AGENTS.md').read_text()
                 self.assertIn('Shared Cortext Working Conventions', agents)
                 self.assertIn('transient', agents)
                 self.assertTrue((target / 'specs/decisions').is_dir())
+                self.assertFalse((target / 'docs/backlog.md').exists())
+                for name in ('README.md', 'AGENTS.md', 'specs/repo-standard.md',
+                             'docs/work-tracking.md'):
+                    self.assertIn('specs/HLD.md', (target / name).read_text(), name)
+                # Every link in the generated workflow and HLD must resolve.
+                for name in ('README.md', 'specs/HLD.md', 'docs/roadmap.md',
+                             'docs/implementation-plan.md'):
+                    source = target / name
+                    for link in re.findall(r'\]\(([^)]+)\)', source.read_text()):
+                        self.assertTrue((source.parent / link).exists(), (name, link))
                 for file in target.rglob('*'):
                     if file.is_file():
                         self.assertNotIn('{{', file.read_text(), str(file))
@@ -58,6 +69,20 @@ class ScaffoldTests(unittest.TestCase):
                     result = subprocess.run([sys.executable, 'scripts/verify_repo.py'],
                                             cwd=target, capture_output=True, text=True)
                     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    # These are required documents, not optional HLD replacements.
+                    for name in ('specs/HLD.md', 'docs/roadmap.md',
+                                 'docs/implementation-plan.md', 'specs/lifecycle.md',
+                                 'specs/security-privacy.md', 'specs/testing.md',
+                                 'specs/release.md', 'specs/accessibility-localization.md',
+                                 'specs/compatibility.md'):
+                        document = target / name
+                        content = document.read_bytes()
+                        document.unlink()
+                        result = subprocess.run([sys.executable, 'scripts/verify_repo.py'],
+                                                cwd=target, capture_output=True, text=True)
+                        self.assertNotEqual(result.returncode, 0, name)
+                        self.assertIn(name, result.stdout + result.stderr)
+                        document.write_bytes(content)
 
     def test_provenance_is_identical_across_destinations_and_portable(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -86,8 +111,8 @@ class ScaffoldTests(unittest.TestCase):
             source = Path(tmp) / 'template'
             (source / 'base/docs').mkdir(parents=True)
             (source / 'profiles/component/docs').mkdir(parents=True)
-            (source / 'base/docs/backlog.md').write_text('shared')
-            (source / 'profiles/component/docs/backlog.md').write_text('override')
+            (source / 'base/docs/roadmap.md').write_text('shared')
+            (source / 'profiles/component/docs/roadmap.md').write_text('override')
             target = Path(tmp) / 'output'
             with self.assertRaisesRegex(ValueError, 'collides'):
                 MODULE.scaffold('component', 'sample', target, template_root=source)

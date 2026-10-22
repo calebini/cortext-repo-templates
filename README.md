@@ -20,7 +20,7 @@ and directories; generate Xcode, Gradle or framework projects using native tooli
 
 ## Ownership
 
-- `base/` owns common agent guidance, work tracking, backlog and implementation-plan
+- `base/` owns common agent guidance, work tracking, roadmap and implementation-plan
   starters. Update shared conventions here once.
 - `profiles/component/` owns the Python component layout, tools and specifications.
 - `profiles/mobile/` owns mobile lifecycle, privacy, accessibility, release guidance
@@ -28,13 +28,34 @@ and directories; generate Xcode, Gradle or framework projects using native tooli
 - `scripts/scaffold.py` composes base files with the selected profile. Base files
   cannot be overridden silently. Agent instructions are composed explicitly.
 
-Work tracking separates future work in the backlog, durable incremental execution
+Work tracking separates future work in the roadmap, durable incremental execution
 in the implementation plan, durable choices in decision records, and transient
 handoff context. See [the shared convention](base/docs/work-tracking.md).
 
 Each generated repo records version, profile, platform and source-content digest
 in `.cortext-template.json`. It contains no source installation paths or host data.
 Existing repositories adopt later template changes deliberately.
+
+## Workflow artifacts
+
+Both profiles use README for context and guidance, AGENTS for agent ground rules,
+`specs/HLD.md` as the authoritative design entry point, `docs/implementation-plan.md`
+for current delivery and linked handoffs, and `docs/roadmap.md` for future ideas.
+Supporting specs hold detailed promises without duplicating the HLD. Mobile retains
+its required lifecycle, privacy, testing, accessibility, compatibility and release specs.
+
+### Adopting version 0.2.0
+
+Existing repositories are not updated automatically. To adopt this workflow:
+
+1. Rename `docs/backlog.md` to `docs/roadmap.md`, preserving ideas and updating links.
+2. Add `specs/HLD.md` as a design entry point, summarizing and linking existing specs.
+   Keep established detailed promises and all required mobile specifications intact.
+3. Update README navigation, agent guidance and work-tracking conventions. Keep current
+   execution status in the implementation plan and link any active separate handoff.
+4. Update project structure checks to require the HLD and workflow documents. Verify
+   links and run the project's relevant checks. Preserve original generation provenance;
+   record deliberate adoption in the plan or changelog instead of claiming regeneration.
 
 ## Verify
 
@@ -47,7 +68,7 @@ substitutions, profile boundaries and refusal to overwrite existing work.
 
 ## Template development
 
-Use [the backlog](docs/backlog.md) for future template work and [the implementation
+Use [the roadmap](docs/roadmap.md) for future template work and [the implementation
 plan](docs/implementation-plan.md) for selected delivery. The initial profiles
 preserve the earlier Cortext component and mobile starter content. Those original
 folders are retained as historical sources; this repository is the unified source

@@ -16,6 +16,13 @@ the selected profile defines the native layout and toolchain.
 - `core/` contains framework-light domain behavior where practical.
 - `tests/` contains cross-boundary and acceptance expectations.
 
+## Design entry point
+
+`specs/HLD.md` is the authoritative high-level design entry point. Define scope,
+system context, architecture, major flows and constraints there, and link the
+required supporting specifications below. Keep each detailed promise in one place.
+The HLD does not replace mobile safety requirements or release qualification.
+
 ## Required specifications
 
 Shared work tracking follows [docs/work-tracking.md](../docs/work-tracking.md).
