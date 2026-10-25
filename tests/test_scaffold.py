@@ -34,7 +34,7 @@ class ScaffoldTests(unittest.TestCase):
                 self.assertEqual(result.stdout, name + '\n')
 
     def test_all_profiles_share_tracking_and_keep_platform_boundaries(self):
-        for profile, platform in [('component', None), *[('mobile', p) for p in MODULE.PLATFORMS]]:
+        for profile, platform in [('component', None), ('go', None), *[('mobile', p) for p in MODULE.PLATFORMS]]:
             with self.subTest(profile=profile, platform=platform), tempfile.TemporaryDirectory() as tmp:
                 target = Path(tmp) / 'sample'
                 MODULE.scaffold(profile, 'sample-app', target, platform=platform, display_name='Sample App')
@@ -60,6 +60,20 @@ class ScaffoldTests(unittest.TestCase):
                 if profile == 'component':
                     self.assertTrue((target / 'src/sample_app/cli.py').is_file())
                     self.assertFalse((target / 'app').exists())
+                elif profile == 'go':
+                    for name in ('main.go', '.go-version', '.github/workflows/go.yml',
+                                 'docs/development.md'):
+                        self.assertTrue((target / name).is_file(), name)
+                    for name in ('pyproject.toml', 'src', 'app', 'go.mod', 'go.sum',
+                                 'contracts', 'internal', 'cmd'):
+                        self.assertFalse((target / name).exists(), name)
+                    self.assertIn('sample-app', (target / 'main.go').read_text())
+                    self.assertTrue(agents.startswith((ROOT / 'base/AGENTS.md').read_text() + '\n'))
+                    for source in target.rglob('*.md'):
+                        for link in re.findall(r'\]\(([^)]+)\)', source.read_text()):
+                            if '://' not in link and not link.startswith('#'):
+                                self.assertTrue((source.parent / link.split('#')[0]).exists(),
+                                                (source, link))
                 else:
                     self.assertFalse((target / 'pyproject.toml').exists())
                     self.assertTrue((target / 'profile/README.md').is_file())
@@ -90,6 +104,43 @@ class ScaffoldTests(unittest.TestCase):
             self.assertEqual(results[0], results[1])
             self.assertNotIn(tmp, json.dumps(results))
             self.assertEqual(len(results[0]['source_digest']), 64)
+
+    def test_go_profile_provenance_tracks_profile_content(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as tmp:
+            template = Path(tmp) / 'template'
+            shutil.copytree(ROOT / 'base', template / 'base')
+            shutil.copytree(ROOT / 'profiles/go', template / 'profiles/go')
+            (template / 'scripts').mkdir()
+            shutil.copy(ROOT / 'scripts/scaffold.py', template / 'scripts/scaffold.py')
+            shutil.copy(ROOT / 'VERSION', template / 'VERSION')
+            first = MODULE.scaffold('go', 'sample', Path(tmp) / 'one', template_root=template)
+            second = MODULE.scaffold('go', 'sample', Path(tmp) / 'two', template_root=template)
+            self.assertEqual(first, second)
+            self.assertEqual(first['profile'], 'go')
+            self.assertIsNone(first['platform'])
+            self.assertNotIn(tmp, json.dumps(first))
+            (template / 'profiles/go/.go-version').write_text('1.27.4\n')
+            third = MODULE.scaffold('go', 'sample', Path(tmp) / 'three', template_root=template)
+            self.assertNotEqual(first['source_digest'], third['source_digest'])
+
+    def test_language_options_are_scoped_to_their_profiles(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / 'output'
+            for profile in ('go', 'mobile'):
+                with self.subTest(profile=profile), self.assertRaisesRegex(ValueError, 'Package name'):
+                    MODULE.scaffold(profile, 'sample', target, package_name='sample',
+                                    platform='ios-swift' if profile == 'mobile' else None)
+                self.assertFalse(target.exists())
+            for profile in ('go', 'component'):
+                with self.subTest(profile=profile), self.assertRaisesRegex(ValueError, 'platform'):
+                    MODULE.scaffold(profile, 'sample', target, platform='ios-swift')
+                self.assertFalse(target.exists())
+            with self.assertRaisesRegex(ValueError, 'Python identifier'):
+                MODULE.scaffold('component', 'class', target)
+            # A Python keyword is an ordinary Go project slug.
+            MODULE.scaffold('go', 'class', target)
+            self.assertTrue((target / 'main.go').is_file())
 
     def test_refuses_existing_work_and_invalid_input_before_writing(self):
         with tempfile.TemporaryDirectory() as tmp:

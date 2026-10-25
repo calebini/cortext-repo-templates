@@ -1,0 +1,28 @@
+name: Go checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: local
+      CGO_ENABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: false
+      - name: Require native module initialization
+        run: test -f go.mod || { echo 'Initialize the module as described in README.md and commit go.mod.'; exit 1; }
+      - name: Formatting
+        run: test -z "$(gofmt -l .)"
+      - run: go mod tidy -diff
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go test -race ./...
+      - run: go build ./...
+      - name: Install pinned vulnerability checker
+        run: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+      - run: govulncheck ./...

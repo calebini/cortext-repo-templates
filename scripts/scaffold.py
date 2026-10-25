@@ -37,18 +37,18 @@ def source_files(directory: Path) -> list[Path]:
 def scaffold(profile: str, slug: str, destination: Path, *, platform: str | None = None,
              display_name: str | None = None, package_name: str | None = None,
              template_root: Path = ROOT) -> dict:
-    if profile not in {'component', 'mobile'}:
+    if profile not in {'component', 'mobile', 'go'}:
         raise ValueError('Unknown profile')
     if not re.fullmatch(r'[a-z][a-z0-9]*(?:-[a-z0-9]+)*', slug):
         raise ValueError('Slug must be lowercase words separated by hyphens')
     package = package_name or slug.replace('-', '_')
-    if not package.isidentifier() or keyword.iskeyword(package):
+    if profile == 'component' and (not package.isidentifier() or keyword.iskeyword(package)):
         raise ValueError('Package name must be a Python identifier')
     if profile == 'mobile' and platform not in PLATFORMS:
         raise ValueError('Mobile profile requires a supported platform')
-    if profile == 'component' and platform is not None:
-        raise ValueError('Component profile does not take a platform')
-    if profile == 'mobile' and package_name is not None:
+    if profile != 'mobile' and platform is not None:
+        raise ValueError('Only the mobile profile takes a platform')
+    if profile != 'component' and package_name is not None:
         raise ValueError('Package name applies only to the component profile')
     if destination.is_symlink():
         raise ValueError('Destination cannot be a symlink')
@@ -127,7 +127,7 @@ def scaffold(profile: str, slug: str, destination: Path, *, platform: str | None
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('profile', choices=['component', 'mobile'])
+    parser.add_argument('profile', choices=['component', 'mobile', 'go'])
     parser.add_argument('slug')
     parser.add_argument('destination', type=Path)
     parser.add_argument('--platform', choices=sorted(PLATFORMS))
